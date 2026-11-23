@@ -1,0 +1,105 @@
+{
+  "patients": [
+    {
+      "id": "1",
+      "name": "Aarav Patel",
+      "age": 34,
+      "gender": "Male",
+      "phone": "9876543210",
+      "type": "IPD",
+      "status": "Admitted"
+    },
+    {
+      "id": "2",
+      "name": "Priya Sharma",
+      "age": 28,
+      "gender": "Female",
+      "phone": "9825011223",
+      "type": "OPD",
+      "status": "Active"
+    },
+    {
+      "id": "3",
+      "name": "Ramesh Joshi",
+      "age": 61,
+      "gender": "Male",
+      "phone": "9898123456",
+      "type": "IPD",
+      "status": "Discharged"
+    }
+  ],
+  "beds": [
+    {
+      "id": "101",
+      "bedNumber": "GEN-101",
+      "ward": "General",
+      "status": "Occupied",
+      "patientId": "1",
+      "patientName": "Aarav Patel"
+    },
+    {
+      "id": "102",
+      "bedNumber": "GEN-102",
+      "ward": "General",
+      "status": "Occupied",
+      "patientId": "3",
+      "patientName": "Ramesh Joshi"
+    },
+    {
+      "id": "103",
+      "bedNumber": "GEN-103",
+      "ward": "General",
+      "status": "Maintenance",
+      "patientId": null,
+      "patientName": null
+    },
+    {
+      "id": "201",
+      "bedNumber": "ICU-201",
+      "ward": "ICU",
+      "status": "Available",
+      "patientId": null,
+      "patientName": null
+    },
+    {
+      "id": "202",
+      "bedNumber": "ICU-202",
+      "ward": "ICU",
+      "status": "Available",
+      "patientId": null,
+      "patientName": null
+    },
+    {
+      "id": "301",
+      "bedNumber": "PRV-301",
+      "ward": "Private",
+      "status": "Available",
+      "patientId": null,
+      "patientName": null
+    }
+  ],
+  "medicines": [
+    { "id": "m1", "name": "Paracetamol 500mg", "category": "Tablet", "stock": 120, "minThreshold": 30, "unitPrice": 25, "gstRate": 12 },
+    { "id": "m2", "name": "Amoxicillin 250mg", "category": "Capsule", "stock": 14, "minThreshold": 25, "unitPrice": 85, "gstRate": 12 },
+    { "id": "m3", "name": "Insulin Glargine", "category": "Injection", "stock": 6, "minThreshold": 15, "unitPrice": 650, "gstRate": 5 },
+    { "id": "m4", "name": "ORS Electrolyte Pack", "category": "Sachet", "stock": 80, "minThreshold": 20, "unitPrice": 20, "gstRate": 5 }
+  ],
+  "invoices": [
+    {
+      "id": "inv1",
+      "invoiceNumber": "INV-2026-001",
+      "patientId": "1",
+      "patientName": "Aarav Patel",
+      "date": "2026-11-20",
+      "items": [
+        { "id": "row1", "description": "OPD Consultation", "quantity": 1, "unitPrice": 500, "gstRate": 0 },
+        { "id": "row2", "description": "Paracetamol 500mg", "quantity": 2, "unitPrice": 25, "gstRate": 12 }
+      ],
+      "subtotal": 550,
+      "gstAmount": 6,
+      "totalAmount": 556,
+      "status": "Paid"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

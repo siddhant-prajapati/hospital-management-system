@@ -1,0 +1,108 @@
+# ==============================================================================
+# Hospital Management System (HMS) — Docker Compose Configuration
+# Services:
+#   1. postgres  : PostgreSQL 16 relational database
+#   2. backend   : Spring Boot 3 REST API (/api/v1)
+#   3. pgadmin   : Web-based PostgreSQL administration interface
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # Database Service: PostgreSQL
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: hms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hms_db}
+      POSTGRES_USER: ${POSTGRES_USER:-hms_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hms_pass}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hms_user} -d ${POSTGRES_DB:-hms_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hms-network
+
+  # ----------------------------------------------------------------------------
+  # Backend Service: Spring Boot REST API
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./hospital_management_system
+      dockerfile: Dockerfile
+    container_name: hms-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: hospital-management-system
+      SERVER_PORT: 8080
+      SERVER_SERVLET_CONTEXT_PATH: /api/v1
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-hms_db}
+      DB_USERNAME: ${POSTGRES_USER:-hms_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-hms_pass}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${DDL_AUTO:-update}
+      APPLICATION_SECURITY_JWT_SECRET_KEY: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -Djava.awt.headless=true"
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - hms-network
+
+  # ----------------------------------------------------------------------------
+  # Database Management GUI: pgAdmin 4
+  # ----------------------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:8.11
+    container_name: hms-pgadmin
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@hospital.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - hms-network
+
+# ------------------------------------------------------------------------------
+# Persistent Storage Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  postgres_data:
+    name: hms_postgres_data
+    driver: local
+  pgadmin_data:
+    name: hms_pgadmin_data
+    driver: local
+
+# ------------------------------------------------------------------------------
+# Bridge Network
+# ------------------------------------------------------------------------------
+networks:
+  hms-network:
+    name: hms-network
+    driver: bridge
